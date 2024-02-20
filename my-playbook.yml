@@ -1,0 +1,60 @@
+---
+- name: Setup Product on Raspberry Pi
+  hosts: raspberry_pi
+  become: yes
+  vars:
+    user_email: "user@example.com"
+    user_password: "user_password"
+    binary_url: "https://example.com/path/to/binary"
+    run_script_params:
+      - param1: "value1"
+      - param2: "value2"
+  tasks:
+    - name: Install required packages
+      apt:
+        name: [ "git", "python3-pip" ]  # Modify as necessary for your requirements
+        state: present
+      become: yes
+
+    - name: Clone repository with setup scripts
+      git:
+        repo: https://github.com/yourusername/yourrepository.git
+        dest: /home/pi/setup-scripts
+      become: yes
+
+    - name: Generate SSH keys for user
+      shell: ssh-keygen -t rsa -N '' -f /home/pi/.ssh/id_rsa -C "{{ user_email }}"
+      args:
+        creates: /home/pi/.ssh/id_rsa
+      become_user: pi
+
+    - name: Register SSH key with account
+      uri:
+        url: "https://yourwebsite.com/api/ssh-keys"
+        method: POST
+        body_format: json
+        body: "{{ lookup('file', '/home/pi/.ssh/id_rsa.pub') }}"
+        headers:
+          Content-Type: "application/json"
+      register: ssh_key_registration
+      become_user: pi
+
+    - name: Download binary
+      get_url:
+        url: "{{ binary_url }}"
+        dest: /home/pi/product-binary
+        mode: 0755
+
+    - name: Write run script
+      template:
+        src: run_script_template.sh
+        dest: /home/pi/run_script.sh
+        mode: 0755
+      vars:
+        params: "{{ run_script_params }}"
+
+    - name: Run binary with parameters
+      command: "/home/pi/product-binary {{ item }}"
+      loop: "{{ run_script_params }}"
+      async: 3600
+      poll: 0
