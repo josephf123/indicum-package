@@ -37,7 +37,9 @@ extractFieldsAndExecute() {
 
 while [ true ]; do
     interface="wlan0"
-    expectedSSID="Free Telstra Wi-Fi"
+    ssid="Free Telstra Wi-Fi"
+
+    nmcli device wifi connect "$ssid" ifname "$interface"
 
     if ping -c 1 8.8.8.8 -W 5 &> /dev/null; then
         echo "ping success"
