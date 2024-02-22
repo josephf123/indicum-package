@@ -39,13 +39,13 @@ while [ true ]; do
     interface="wlan0"
     expectedSSID="Free Telstra Wi-Fi"
 
-    if ping -c 1 8.8.8.8 &> /dev/null; then
+    if ping -c 1 8.8.8.8 -W 5 &> /dev/null; then
         echo "ping success"
         extractFieldsAndExecute
     else
         currentSSID=$(iwgetid -r "$interface")
         echo "currentSSID is $currentSSID"
-
+    fi
 
     # currentSSID=$(iwgetid -r "$interface")
 
