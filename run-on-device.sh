@@ -3,7 +3,7 @@
 
 extractFieldsAndExecute() {
     # this will redirect and give payphone details
-    urlAddress=$(curl -c cookies.txt --interface wlan1 http://google.com | cut -d\" -f2)
+    urlAddress=$(curl -c cookies.txt --interface wlan0 http://google.com | cut -d\" -f2)
     payphoneMAC=$(echo $urlAddress | grep -oP 'mac=\K[^&]*')
     payphoneID=$(echo $urlAddress | grep -oP 'a=\K[^&]*')
     payphoneTime=$(echo $urlAddress | grep -oP 'b=\K[^&]*')
@@ -18,7 +18,7 @@ extractFieldsAndExecute() {
     fi
 
     # this will connect us to the internet 
-    curl --interface wlan1 -H "X-Requested-With: XMLHTTPRequest" -b cookies.txt https://apac.network-auth.com/splash/NAxIVbNc.5.167/grant?continue_url=
+    curl --interface wlan0 -H "X-Requested-With: XMLHTTPRequest" -b cookies.txt https://apac.network-auth.com/splash/NAxIVbNc.5.167/grant?continue_url=
 
     # check if connected to internet 
 
@@ -26,7 +26,7 @@ extractFieldsAndExecute() {
     ./indicum-client $payphoneMAC $payphoneID $payphoneTime
 
     # change our MAC address (so we will have to sign in again when we re-see payphone)
-    sudo ifconfig wlan1 down && sudo macchanger -r wlan1 && sudo ifconfig wlan1 up
+    sudo ifconfig wlan0 down && sudo macchanger -r wlan0 && sudo ifconfig wlan0 up
 
 }
 
@@ -35,7 +35,6 @@ extractFieldsAndExecute() {
 # check that the network connected to is "Free Telstra Wifi"
 
 while [ true ]; do
-    # using wlan1 (my alfa network card as the one that does the hotspot finding)
     interface="wlan0"
     expectedSSID="Free Telstra Wi-Fi"
     currentSSID=$(iwgetid -r "$interface")
