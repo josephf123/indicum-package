@@ -46,6 +46,7 @@ while [ true ]; do
         currentSSID=$(iwgetid -r "$interface")
         echo "currentSSID is $currentSSID"
 
+
     # currentSSID=$(iwgetid -r "$interface")
 
     # if [ "$expectedSSID" == "$currentSSID" ]; then
