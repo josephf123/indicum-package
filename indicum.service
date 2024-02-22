@@ -1,0 +1,11 @@
+[Unit]
+Description=Keep indicum running
+
+[Service]
+Type=simple
+ExecStart=/home/ag/run-on-device.sh
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
