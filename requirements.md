@@ -10,6 +10,13 @@ Login (create an account)
 
 sudo apt install git -y
 
+sudo chmod +x indicum.service
+
+sudo chmod +x run-on-device.sh
+
+sudo cp indicum.service /etc/systemd/system/
+
+
 
 git clone 
 
