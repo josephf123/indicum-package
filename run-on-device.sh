@@ -36,7 +36,7 @@ extractFieldsAndExecute() {
 
 while [ true ]; do
     # using wlan1 (my alfa network card as the one that does the hotspot finding)
-    interface="wlan1"
+    interface="wlan0"
     expectedSSID="Free Telstra Wi-Fi"
     currentSSID=$(iwgetid -r "$interface")
 

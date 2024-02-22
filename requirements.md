@@ -8,6 +8,9 @@ Second easiest way is for people who have used github
 
 Login (create an account)
 
+sudo apt install git -y
+
+
 git clone 
 
 
