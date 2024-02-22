@@ -1,3 +1,4 @@
+#!/bin/bash
 # check if device is connected to a network (check if they have an IP addresss)
 
 
@@ -23,7 +24,7 @@ extractFieldsAndExecute() {
     # check if connected to internet 
 
     # run executable
-    ./indicum-client $payphoneMAC $payphoneID $payphoneTime
+    /usr/local/bin/client-indicum $payphoneMAC $payphoneID $payphoneTime
 
     # change our MAC address (so we will have to sign in again when we re-see payphone)
     sudo ifconfig wlan0 down && sudo macchanger -r wlan0 && sudo ifconfig wlan0 up
@@ -37,14 +38,22 @@ extractFieldsAndExecute() {
 while [ true ]; do
     interface="wlan0"
     expectedSSID="Free Telstra Wi-Fi"
-    currentSSID=$(iwgetid -r "$interface")
 
-    if [ "$expectedSSID" == "$currentSSID" ]; then
+    if ping -c 1 8.8.8.8 &> /dev/null; then
+        echo "ping success"
         extractFieldsAndExecute
-        # maybe add sleep 100 here, we don't really care if you stay next to it.
-    else 
+    else
+        currentSSID=$(iwgetid -r "$interface")
         echo "currentSSID is $currentSSID"
-    fi
+
+    # currentSSID=$(iwgetid -r "$interface")
+
+    # if [ "$expectedSSID" == "$currentSSID" ]; then
+    #     extractFieldsAndExecute
+    #     # maybe add sleep 100 here, we don't really care if you stay next to it.
+    # else 
+    #     echo "currentSSID is $currentSSID"
+    # fi
     sleep 5
 
 done
