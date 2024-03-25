@@ -1,64 +1,64 @@
 #!/bin/bash
-# check if device is connected to a network (check if they have an IP addresss)
-
 
 extractFieldsAndExecute() {
-    # this will redirect and give payphone details
-    urlAddress=$(curl -c cookies.txt --interface wlan0 http://google.com | cut -d\" -f2)
-    payphoneMAC=$(echo $urlAddress | grep -oP 'mac=\K[^&]*')
+    # go to any website so I can get the metadata (payphoneMAC, payphoneID, payphoneTime)
+    output=$(curl --interface "$interface" http://google.com -m 10) || { echo "[ERROR] inital curl timeout"; return 1 }
+    urlAddress=$(echo "$output" | cut -d\" -f2)
+    # need to use -L to get cookies (cookies are used to authenticate)
+    curl -c /tmp/cookies.txt -s -L --interface $interface http://google.com -m 10 || { echo "[ERROR] initial curl timeout"; return 1 }
+    payphoneMAC=$(echo $urlAddress | grep -oP '\?mac=\K[^&]*')
+    # a little trick to urldecode. Replace %3A into :
+    payphoneMAC=$(echo "${payphoneMAC//%3A/:}")
     payphoneID=$(echo $urlAddress | grep -oP 'a=\K[^&]*')
     payphoneTime=$(echo $urlAddress | grep -oP 'b=\K[^&]*')
 
+    echo "[INFO] urlAddress is $urlAddress"
     if [ -z "$payphoneMAC" ] || [ -z "$payphoneID" ] || [ -z "$payphoneTime" ]; then
-
-        echo "One or more payphone details are missing or empty."
-        echo "$payphoneMAC"
-        echo "$payphoneID"
-        echo "$payphoneTime"
-        return 1 
+        echo "[INFO] $payphoneMAC"
+        echo "[INFO] $payphoneID"
+        echo "[INFO] $payphoneTime"
+        echo "[ERROR] One or more payphone details are missing or empty."
+        return 1
     fi
+    echo "[INFO] Succesfully got urlAddress"
+    # this will connect us to the internet (using the cookies for authentication)
+    curl --interface "$interface" -m 20 -H "X-Requested-With: XMLHTTPRequest" -b /tmp/cookies.txt \
+    https://apac.network-auth.com/splash/NAxIVbNc.5.167/grant?continue_url= || { echo "[ERROR] curl timeout"; return 1 }
 
-    # this will connect us to the internet 
-    curl --interface wlan0 -H "X-Requested-With: XMLHTTPRequest" -b cookies.txt https://apac.network-auth.com/splash/NAxIVbNc.5.167/grant?continue_url=
-
-    # check if connected to internet 
-
+    # check if connected to internet
+    echo "[INFO] Succesfully connected to internet"
+    echo "[INFO] $payphoneMAC"
+    echo "[INFO] $payphoneID"
+    echo "[INFO] $payphoneTime"
     # run executable
     /usr/local/bin/client-indicum $payphoneMAC $payphoneID $payphoneTime
 
+    echo "[INFO] Successfully ran client-indicum"
     # change our MAC address (so we will have to sign in again when we re-see payphone)
-    sudo ifconfig wlan0 down && sudo macchanger -r wlan0 && sudo ifconfig wlan0 up
+    sudo ifconfig "$interface" down && sudo macchanger -r "$interface" && sudo ifconfig "$interface" up
 
+    echo "[INFO] successfully changed mac address"
 }
 
-
-
-# check that the network connected to is "Free Telstra Wifi"
-
 while [ true ]; do
-    interface="wlan0"
-    ssid="Free Telstra Wi-Fi"
+    interface="wlan1"
+    expectedSSID="Free Telstra Wi-Fi"
 
-    nmcli device wifi connect "$ssid" ifname "$interface"
-
-    if ping -c 1 8.8.8.8 -W 5 &> /dev/null; then
-        echo "ping success"
+    # initial internet test check
+    if ping -c 1 8.8.8.8 -W 5 -I "$interface" &> /dev/null; then
+        echo "[INFO] ping success"
         extractFieldsAndExecute
     else
+        # if failed, check if interface is connected to wifi but just doesn't have internet access
         currentSSID=$(iwgetid -r "$interface")
-        echo "currentSSID is $currentSSID"
+        if [ "$currentSSID" = "$expectedSSID" ]; then
+            # if so, reset MAC address, this usually fixes it
+            sudo ifconfig "$interface" down && sudo macchanger -r "$interface" && sudo ifconfig "$interface" up
+        fi
+        echo "[INFO] currentSSID is $currentSSID"
     fi
 
-    # currentSSID=$(iwgetid -r "$interface")
-
-    # if [ "$expectedSSID" == "$currentSSID" ]; then
-    #     extractFieldsAndExecute
-    #     # maybe add sleep 100 here, we don't really care if you stay next to it.
-    # else 
-    #     echo "currentSSID is $currentSSID"
-    # fi
     sleep 5
 
 done
 
-# if so get details from redirect
