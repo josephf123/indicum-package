@@ -2,10 +2,10 @@
 
 extractFieldsAndExecute() {
     # go to any website so I can get the metadata (payphoneMAC, payphoneID, payphoneTime)
-    output=$(curl --interface "$interface" http://google.com -m 10) || { echo "[ERROR] inital curl timeout"; return 1 }
+    output=$(curl --interface "$interface" http://google.com -m 10) || { echo "[ERROR] inital curl timeout"; return 1; }
     urlAddress=$(echo "$output" | cut -d\" -f2)
     # need to use -L to get cookies (cookies are used to authenticate)
-    curl -c /tmp/cookies.txt -s -L --interface $interface http://google.com -m 10 || { echo "[ERROR] initial curl timeout"; return 1 }
+    curl -c /tmp/cookies.txt -s -L --interface $interface http://google.com -m 10 || { echo "[ERROR] initial curl timeout"; return 1; }
     payphoneMAC=$(echo $urlAddress | grep -oP '\?mac=\K[^&]*')
     # a little trick to urldecode. Replace %3A into :
     payphoneMAC=$(echo "${payphoneMAC//%3A/:}")
@@ -23,7 +23,7 @@ extractFieldsAndExecute() {
     echo "[INFO] Succesfully got urlAddress"
     # this will connect us to the internet (using the cookies for authentication)
     curl --interface "$interface" -m 20 -H "X-Requested-With: XMLHTTPRequest" -b /tmp/cookies.txt \
-    https://apac.network-auth.com/splash/NAxIVbNc.5.167/grant?continue_url= || { echo "[ERROR] curl timeout"; return 1 }
+    https://apac.network-auth.com/splash/NAxIVbNc.5.167/grant?continue_url= || { echo "[ERROR] curl timeout"; return 1; }
 
     # check if connected to internet
     echo "[INFO] Succesfully connected to internet"
@@ -37,7 +37,7 @@ extractFieldsAndExecute() {
     # change our MAC address (so we will have to sign in again when we re-see payphone)
     sudo ifconfig "$interface" down && sudo macchanger -r "$interface" && sudo ifconfig "$interface" up
 
-    echo "[INFO] successfully changed mac address"
+    echo "[INFO] successfully changed mac address"; 
 }
 
 while [ true ]; do

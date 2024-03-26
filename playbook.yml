@@ -10,12 +10,13 @@
   tasks:
     - name: Install packages
       ansible.builtin.apt:
-        pkg: 
-        - git  
+        pkg:
+        - git
         - macchanger
-        upgrade: yes
-        update_cache: yes
-        cache_valid_time: 86400
+    - name: Ensure the group 'indicum' exists
+      ansible.builtin.group:
+        name: indicum
+        state: present
     - name: Add user indicum
       ansible.builtin.user:
         name: indicum
@@ -83,7 +84,7 @@
         mode: 0755
     - name: Copy nmconnection file to /etc
       ansible.builtin.copy:
-        src: "./indicum-package/Free Telstra Wi-Fi.nmconnection"
+        src: "./Free Telstra Wi-Fi.nmconnection"
         dest: /etc/NetworkManager/system-connections
         owner: root
         group: root
@@ -94,4 +95,3 @@
         state: restarted
         enabled: yes
         daemon_reload: true
-
