@@ -1,7 +1,7 @@
 [connection]
 id=Free Telstra Wi-Fi
 type=wifi
-interface-name=wlan1
+interface-name=wlan0
 autoconnect=true
 
 [wifi]

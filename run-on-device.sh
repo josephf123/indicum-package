@@ -41,16 +41,18 @@ extractFieldsAndExecute() {
 }
 
 while [ true ]; do
-    interface="wlan1"
+    interface="wlan0"
     expectedSSID="Free Telstra Wi-Fi"
-
+    currentSSID=$(iwgetid -r "$interface")
     # initial internet test check
     if ping -c 1 8.8.8.8 -W 5 -I "$interface" &> /dev/null; then
-        echo "[INFO] ping success"
-        extractFieldsAndExecute
+        echo "[INFO] ping success | $currentSSID "
+	if [ "$currentSSID" = "$expectedSSID" ]; then
+		echo "[INFO] running function"
+        	extractFieldsAndExecute
+	fi
     else
         # if failed, check if interface is connected to wifi but just doesn't have internet access
-        currentSSID=$(iwgetid -r "$interface")
         if [ "$currentSSID" = "$expectedSSID" ]; then
             # if so, reset MAC address, this usually fixes it
             sudo ifconfig "$interface" down && sudo macchanger -r "$interface" && sudo ifconfig "$interface" up
