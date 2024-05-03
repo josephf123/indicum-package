@@ -3,7 +3,7 @@ Description=Keep indicum running
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/run-on-device.sh
+ExecStart=/bin/sh -c '/usr/local/bin/run-on-device.sh >> /var/log/run-on-device.log 2>&1'
 Restart=always
 RestartSec=3
 
