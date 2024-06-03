@@ -26,7 +26,7 @@ extractFieldsAndExecute() {
     https://apac.network-auth.com/splash/NAxIVbNc.5.167/grant?continue_url= || { echo "$(date) [ERROR] curl timeout"; return 1; }
 
     # check if connected to internet
-    echo "$(date) [INFO] Succesfully connected to internet"
+    echo "$(date) [INFO] Successfully connected to internet"
     echo "$(date) [INFO] $payphoneMAC"
     echo "$(date) [INFO] $payphoneID"
     echo "$(date) [INFO] $payphoneTime"
